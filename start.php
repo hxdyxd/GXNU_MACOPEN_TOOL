@@ -37,10 +37,6 @@ $worker_s->onWorkerStart = function($worker_s){
 			echo json_encode($row);
 			$msg = mac_pack($row['mac'], $row['isp']);
 			echo socket_sendto($sock, $msg, strlen($msg), 0, '202.193.160.123', 20015)."\n";
-			//$ip = '202.193.160.123';
-			//$port = 20015;
-			//socket_recvfrom($sock, $buf, 5, 0, $ip, $port);
-			//echo '>>>'.bin2hex($buf)."\n";
 		}
 		sleep(15);
 	}
@@ -51,9 +47,9 @@ $worker->onMessage = function($connection, $http){
 	$admin_passwd = 'adminadmin';
 	$err = '0:未知错误，请联系管理员';
 	$db = new SQLite3('gxnu_macopen_tool.db');
-	if($http['server']['REQUEST_URI'] == '/'){
+	if($http['server']['REQUEST_URI'] == '/' || strpos($http['server']['REQUEST_URI'],'index.html')){
 		$connection->send(file_get_contents('./index.html'));
-	}else if($http['server']['REQUEST_URI'] == '/Select.All'){
+	}else if(strpos($http['server']['REQUEST_URI'], 'Select.All')){
 		$result = array();
 		$sql = "SELECT name FROM MACOPEN";
 		$ret = $db->query($sql);
@@ -63,7 +59,7 @@ $worker->onMessage = function($connection, $http){
 		echo "LIST from ".$http['server']['REMOTE_ADDR']."\n";
 		$connection->send(json_encode($result));
 		return $connection->close();
-	}else if($http['server']['REQUEST_URI'] == '/Select' && $http['server']['REQUEST_METHOD'] == 'POST'){
+	}else if(strpos($http['server']['REQUEST_URI'], 'Select') && $http['server']['REQUEST_METHOD'] == 'POST'){
 		if(is_data($http['post']['name'])){
 			$is_select = false;
 			$sql = "SELECT name,SUBSTR(mac,1,8) as mac,isp,info FROM MACOPEN";
@@ -84,7 +80,7 @@ $worker->onMessage = function($connection, $http){
 		}else{
 			$err = '2:MUST SUBMIT NAME.';
 		}
-	}else if($http['server']['REQUEST_URI'] == '/Insert' && $http['server']['REQUEST_METHOD'] == 'POST'){
+	}else if(strpos($http['server']['REQUEST_URI'], 'Insert') && $http['server']['REQUEST_METHOD'] == 'POST'){
 		if(is_data($http['post']['name']) && is_data($http['post']['mac']) && is_data($http['post']['isp']) && is_data($http['post']['passwd'])){
 			$is_recover = false;
 			$sql = "SELECT name,mac FROM MACOPEN";
@@ -121,7 +117,7 @@ $worker->onMessage = function($connection, $http){
 		}else{
 			$err = '6:只能输入字母和数字还有 :  -  . 哦';
 		}
-	}else if($http['server']['REQUEST_URI'] == '/Delete' && $http['server']['REQUEST_METHOD'] == 'POST'){
+	}else if(strpos($http['server']['REQUEST_URI'], 'Delete') && $http['server']['REQUEST_METHOD'] == 'POST'){
 		if(is_data($http['post']['name']) && is_data($http['post']['passwd'])){
 			$is_del = false;
 			$sql = "SELECT name,passwd FROM MACOPEN";
@@ -170,7 +166,6 @@ function is_data($data){
 function mac_pack($mac, $isp){
 	global $server_inner_ip;
 	$isp = chr($isp);
-	//$sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 	//---header---56bytes---
 	$msg = str_repeat("\x00", 30);
 	$msg .= inet_pton($server_inner_ip);
@@ -198,9 +193,6 @@ function mac_pack($mac, $isp){
 	for($i=0;$i<4;$i++){
 		$msg .= chr(($ecx>>($i*8))&0x000000FF);
 	}
-	//---header---send---
-	//$len = socket_sendto($sock, $msg, strlen($msg), 0, '202.193.160.123', 20015);
-	//socket_close($sock);
 	return $msg;
 }
 
