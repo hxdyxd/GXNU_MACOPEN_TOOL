@@ -12,7 +12,6 @@
 $server_inner_ip = '172.16.0.0';
 
 use \Workerman\Worker;
-use \Workerman\WebServer;
 require_once './Workerman/Autoloader.php';
 
 $worker = new Worker('http://0.0.0.0:80');
