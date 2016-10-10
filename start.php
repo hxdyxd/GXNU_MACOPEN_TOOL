@@ -12,6 +12,7 @@
 $server_inner_ip = '172.16.0.0';
 
 use \Workerman\Worker;
+use \Workerman\WebServer;
 require_once './Workerman/Autoloader.php';
 
 $worker = new Worker('http://0.0.0.0:80');
@@ -36,6 +37,10 @@ $worker_s->onWorkerStart = function($worker_s){
 			echo json_encode($row);
 			$msg = mac_pack($row['mac'], $row['isp']);
 			echo socket_sendto($sock, $msg, strlen($msg), 0, '202.193.160.123', 20015)."\n";
+			//$ip = '202.193.160.123';
+			//$port = 20015;
+			//socket_recvfrom($sock, $buf, 5, 0, $ip, $port);
+			//echo '>>>'.bin2hex($buf)."\n";
 		}
 		sleep(15);
 	}
@@ -138,6 +143,8 @@ $worker->onMessage = function($connection, $http){
 			}else{
 				$err = '5:删除密匙错误';
 			}
+		}else{
+			$err = '6:只能输入字母和数字还有 :  -  . 哦';
 		}
 	}
 	$connection->send(json_encode( array('success'=>'0', 'msg'=> $err)));
