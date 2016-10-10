@@ -144,10 +144,6 @@ $worker->onMessage = function($connection, $http){
 	return $connection->close();
 };
 
-function convent_to_hex($int){
-	return bin2hex(chr($int));
-}
-
 /*
  must len<20 && [0-9] [a-z] [A-Z] [- . :]
 */
@@ -193,10 +189,6 @@ function mac_pack($mac, $isp){
 		$msg .= chr(($ecx>>($i*8))&0x000000FF);
 	}
 	return $msg;
-}
-
-function err($msg){
-	echo $msg."\n";
 }
 
 Worker::runAll();
