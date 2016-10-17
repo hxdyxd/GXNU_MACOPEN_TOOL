@@ -87,7 +87,7 @@ function getInfo(name) {
             var info = JSON.parse(ajax.responseText);
             $('at').innerHTML = $('bt').innerHTML = info['name'];
             $('data').innerHTML = '<div id="item">名称:&nbsp&nbsp' + info['name'] + '</div>';
-            $('data').innerHTML += '<div id="item">运营商:&nbsp' + info['isp'] + '</div>';
+            $('data').innerHTML += '<div id="item">运营商:&nbsp' + (info['isp']==1?'联通':(info['isp']==2?'电信':(info['isp']==3?'移动':'未知'))) + '</div>';
             $('data').innerHTML += '<div id="item">网卡信息:'+ info['info'] +'</div>';
             $('data').innerHTML += '<div id="item">物理地址:<input id="mac" maxlength="17" placeholder="'+ info['mac'] +':"></div>';
         }
@@ -194,6 +194,11 @@ p{
 	float:right;
 	width:40px;
 }
+
+input{
+	border: 0;
+}
+
     </style>
 </head>
 <body>
