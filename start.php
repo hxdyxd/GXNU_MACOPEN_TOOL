@@ -103,7 +103,7 @@ $worker->onMessage = function($connection, $http){
 				}
 			}
 			if(!$is_recover){
-				$mac = $http['post']['mac'];
+				$mac = strtoupper($http['post']['mac']);
 				$isp = intval($http['post']['isp']);
 				$info = json_decode(@file_get_contents('http://www.imfirewall.com/ip-mac-lookup/get_mac_info.php?mac=' . $mac), true);
 				if($info && $info['success'] == true){
