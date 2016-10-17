@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="MobileOptimized" content="240">
-<title>GXNU MAC OPEN</title>
-<script type="text/javascript">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="MobileOptimized" content="240">
+    <title>GXNU MAC OPEN</title>
+    <script type="text/javascript">
+//@hxdyxd(hxdyxd@gmail.com)
+//仅在广西师范大学校园网使用
+//Only support in the Guangxi Normal University campus network
+//仅支持linux系统
+//only linux is supported.
+//你可能需要设置静态路由
+//You may need to set up a static route
+
 var list_new_uri = './Select.All';
 var info_new_uri = './Select';
 var add_uri = './Insert';
@@ -79,9 +87,9 @@ function getInfo(name) {
             var info = JSON.parse(ajax.responseText);
             $('at').innerHTML = $('bt').innerHTML = info['name'];
             $('data').innerHTML = '<div id="item">名称:&nbsp&nbsp' + info['name'] + '</div>';
-            $('data').innerHTML += '<div id="item">物理地址:' + info['mac'] + ':**:**:**</div>';
             $('data').innerHTML += '<div id="item">运营商:&nbsp' + info['isp'] + '</div>';
             $('data').innerHTML += '<div id="item">网卡信息:'+ info['info'] +'</div>';
+            $('data').innerHTML += '<div id="item">物理地址:<input id="mac" maxlength="17" placeholder="'+ info['mac'] +':"></div>';
         }
     }
 }
@@ -90,23 +98,17 @@ function addInfo() {
     $('a1').innerHTML = $('b1').innerHTML = '<a onClick="getList();">返回</a>';
     $('a2').innerHTML = $('b2').innerHTML = '<a onClick="sendInfo();">提交</a>';
     $('at').innerHTML = $('bt').innerHTML = '添加-GXNU MAC OPEN';
-    $('data').innerHTML = '<div>名称:&nbsp&nbsp<input id="name" maxlength="20">*</div>' 
-    	+ '<div>物理地址:<input id="mac" maxlength="17" placeholder="00:00:00:00:00:00">*</div>'
-        + '<div>运营商:&nbsp<select id="isp"><option value="">未选择</option><option value="1">联通</option><option value="2">电信</option><option value="3">移动</option></select>*</dev>'     
-        + '<div>删除密匙:<input id="passwd" maxlength="20" >*</div>';
+    $('data').innerHTML =  '<div>物理地址:<input id="mac" maxlength="17" placeholder="00:00:00:00:00:00">*</div>'
+        + '<div>运营商:&nbsp<select id="isp"><option value="">未选择</option><option value="1">联通</option><option value="2">电信</option><option value="3">移动</option></select>*</dev>';
 }
 
 function sendInfo() {
-    if ($('name').value == "")
-        alert('必须输入名称');
-    else if ($('mac').value == "" || $('mac').value.length != 17 || $('mac').value.split(':').length != 6)
+    if ($('mac').value == "" || $('mac').value.length != 17 || $('mac').value.split(':').length != 6)
         alert('必须输入正确的物理地址');
     else if ($('isp').value == "")
         alert('必须选择运营商');
-    else if ($('passwd').value == "")
-        alert('必须输入删除密匙,你将来需要用它来修改资料');
     else {
-        var add_data = 'name=' + $('name').value + '&mac=' + $('mac').value + '&isp=' + $('isp').value + '&passwd=' + $('passwd').value;        
+        var add_data = '&mac=' + $('mac').value + '&isp=' + $('isp').value;        
         newAjax();
         if (!ajax) return;
         ajax.open('POST', add_uri, true);
@@ -117,8 +119,8 @@ function sendInfo() {
             if (ajax.readyState == 4 && ajax.status == 200) {
                 var message = JSON.parse(ajax.responseText);
                 if (message && message.success == '1') {
-                    alert('添加成功,请牢记删除密匙:' + $('passwd').value);
-                    getList();
+                    alert('添加成功: 名称：'+ message.name+ ' 物理地址：'+ $('mac').value);
+                    getInfo(message.name);
                 } else {
                     alert(message.msg);
                 } 
@@ -128,16 +130,16 @@ function sendInfo() {
 }
 
 function delInfo(name) {
-    var passwd = prompt("请输入你的删除密匙:\n(如果忘记,请联系管理员)");
-    if (passwd == null || passwd == "")
-        return;
+    var mac = $('mac').value;
+    if (mac == "")
+        return alert('请输入该记录的物理地址');
     if (!confirm('确定删除?删除后将不可恢复!'))
         return;
     newAjax();
     if (!ajax) return;
     ajax.open('POST', del_uri, true);
     ajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    ajax.send('name=' + name + '&passwd=' + passwd); 
+    ajax.send('name=' + name + '&mac=' + mac); 
     ajax.onreadystatechange = function() {
         if (ajax.readyState == 4 && ajax.status == 200) {
             var message = JSON.parse(ajax.responseText);
@@ -155,8 +157,8 @@ function exit() {
     if (confirm('确定退出?')) history.back();
 }
 
-</script>
-<style>
+    </script>
+    <style>
 #a1,#b1{
 	cursor:pointer;
 	float:left;
@@ -192,26 +194,25 @@ p{
 	float:right;
 	width:40px;
 }
-</style>
+    </style>
 </head>
 <body>
-<a id="a1"></a>
-<a id="at">Loading…</a>
-<a id="a2"></a>
-<hr>
-<div id="data"></div>
-<p>
-添加拨号设备的MAC和运营商信息，系统将定时向ipclient服务器发送。
-添加后，你的设备无需任何出校控制器即可正常宽带拨号，断开也可重连。<br>
-请牢记删除密匙，用于删除记录。We don't support Internet Explorer.<br>
-</p>
-
-<hr>
-<a id="b1"></a>
-<a id="bt">Loading…</a>
-<a id="b2"></a> 
-<script type="text/javascript">
+    <a id="a1"></a>
+    <a id="at">Loading…</a>
+    <a id="a2"></a>
+    <hr>
+    <div id="data"></div>
+    <p>
+        添加拨号设备的物理地址和运营商信息，系统将定时向网络中心服务器发送。
+        添加后，你的设备无需任何出校控制器即可正常宽带拨号，断开也可重连。
+        输入完整物理地址可删除记录。<br>We don't support Internet Explorer.<br>
+    </p>
+    <hr>
+    <a id="b1"></a>
+    <a id="bt">Loading…</a>
+    <a id="b2"></a> 
+    <script type="text/javascript">
 getList();
-</script>
+    </script>
 </body>
 </html>
