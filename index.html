@@ -20,6 +20,8 @@ var list_new_uri = './Select.All';
 var info_new_uri = './Select';
 var add_uri = './Insert';
 var del_uri = './Delete';
+var list = new Array();
+var page = 20;  //分页显示条数
 
 
 function $(obj) {
@@ -40,7 +42,8 @@ function newAjax() {
 }
 
 
-function getList() {
+function getList(n) {
+    n=Number(n)
     
     $('a1').innerHTML = '<a onClick="exit();">退出</a>';
     $('b1').innerHTML = '<a onClick="exit();">退出</a>';
@@ -55,24 +58,27 @@ function getList() {
     
     ajax.onreadystatechange = function() {
         if (ajax.readyState == 4 && ajax.status == 200) {
-            var list = JSON.parse(ajax.responseText);
-            $('a2').innerHTML = '<a onClick="addInfo();">添加</a>';
-            $('b2').innerHTML = '<a onClick="addInfo();">添加</a>';
+            list = JSON.parse(ajax.responseText);
+            $('a2').innerHTML = '<a onClick="addInfo('+n+');">添加</a>';
+            $('b2').innerHTML = '<a onClick="addInfo('+n+');">添加</a>';
             $('at').innerHTML = 'GXNU MAC OPEN';
             $('bt').innerHTML = 'GXNU MAC OPEN';
             $('data').innerHTML = '<div>';
-            for (var i = 0; i < list.length; i++) {
-                $('data').innerHTML += '<div id="item" onClick="getInfo(\'' + list[i] + '\');">' + list[i] + '</div>';
+            for (var i = n*page; i < (n*page+page>list.length?list.length:n*page+page); i++) {
+                $('data').innerHTML += '<div id="item" onClick="getInfo(\'' + list[i] + '\','+n+');">' + i + ' ' + list[i] + '</div>';
             } 
+            var number_of_page = Math.ceil(list.length/page);
+            if(n*page+page<list.length) $('data').innerHTML += '<div id="item" onClick="getList(\'' + (n+1) + '\');">下一页'+ (n+2) +'/'+ number_of_page+'</div>';
+            if(n!=0) $('data').innerHTML += '<div id="item" onClick="getList(\'' + (n-1) + '\');">上一页'+ (n) +'/'+ number_of_page+'</div>';
             $('data').innerHTML += '</div>';
         }
     }
 }
 
-function getInfo(name) {
+function getInfo(name, n) {
     
-    $('a1').innerHTML = $('b1').innerHTML = '<a onClick="getList();">返回</a>';
-    $('a2').innerHTML = $('b2').innerHTML = '<a onClick="delInfo(\'' + name + '\');">删除</a>';
+    $('a1').innerHTML = $('b1').innerHTML = '<a onClick="getList('+n+');">返回</a>';
+    $('a2').innerHTML = $('b2').innerHTML = '<a onClick="delInfo(\'' + name + '\','+n+');">删除</a>';
     $('at').innerHTML = $('bt').innerHTML = 'Loading…';
     
     var info_uri = info_new_uri;
@@ -94,15 +100,15 @@ function getInfo(name) {
     }
 }
 
-function addInfo() {
-    $('a1').innerHTML = $('b1').innerHTML = '<a onClick="getList();">返回</a>';
-    $('a2').innerHTML = $('b2').innerHTML = '<a onClick="sendInfo();">提交</a>';
+function addInfo(n) {
+    $('a1').innerHTML = $('b1').innerHTML = '<a onClick="getList('+n+');">返回</a>';
+    $('a2').innerHTML = $('b2').innerHTML = '<a onClick="sendInfo('+n+');">提交</a>';
     $('at').innerHTML = $('bt').innerHTML = '添加-GXNU MAC OPEN';
     $('data').innerHTML =  '<div>物理地址:<input id="mac" maxlength="17" placeholder="00:00:00:00:00:00">*</div>'
         + '<div>运营商:&nbsp<select id="isp"><option value="">未选择</option><option value="1">联通</option><option value="2">电信</option><option value="3">移动</option></select>*</dev>';
 }
 
-function sendInfo() {
+function sendInfo(n) {
     if ($('mac').value == "" || $('mac').value.length != 17 || $('mac').value.split(':').length != 6)
         alert('必须输入正确的物理地址');
     else if ($('isp').value == "")
@@ -120,7 +126,7 @@ function sendInfo() {
                 var message = JSON.parse(ajax.responseText);
                 if (message && message.success == '1') {
                     alert('添加成功: 名称：'+ message.name+ ' 物理地址：'+ $('mac').value);
-                    getInfo(message.name);
+                    getInfo(message.name, n);
                 } else {
                     alert(message.msg);
                 } 
@@ -129,7 +135,7 @@ function sendInfo() {
     } 
 }
 
-function delInfo(name) {
+function delInfo(name, n) {
     var mac = $('mac').value;
     if (mac == "")
         return alert('请输入该记录的物理地址');
@@ -145,7 +151,7 @@ function delInfo(name) {
             var message = JSON.parse(ajax.responseText);
             if (message && message.success == '1') {
                 alert('删除成功');
-                getList();
+                getList(n);
             } else {
                 alert(message.msg);
             }
@@ -217,7 +223,7 @@ input{
     <a id="bt">Loading…</a>
     <a id="b2"></a> 
     <script type="text/javascript">
-getList();
+getList(0);
     </script>
 </body>
 </html>
