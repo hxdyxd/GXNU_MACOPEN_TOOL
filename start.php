@@ -87,7 +87,7 @@ $worker->onMessage = function($connection, $http){
 		}
 	}else if(strpos($http['server']['REQUEST_URI'], 'Insert') && $http['server']['REQUEST_METHOD'] == 'POST'){
 		if(is_data($http['post']['mac']) && is_data($http['post']['isp'])){
-			$name = 'GXNU.'.date("Y.M."). $connection->getRemoteIp().'.RECORD';
+			$name = 'GXNU.'.date("Y.M."). $connection->getRemoteIp().'.RC';
 			$is_recover = false;
 			$sql = "SELECT name,mac FROM MACOPEN";
 			$ret = $db->query($sql);
@@ -155,7 +155,7 @@ $worker->onMessage = function($connection, $http){
  must len<20 && [0-9] [a-z] [A-Z] [- . :]
 */
 function is_data($data){
-	if( isset($data) && strlen($data)<=50 ){
+	if( isset($data) && strlen($data)<=40 ){
 		for($i=0; $i<strlen($data); $i++){
 			if( !(ord($data[$i]) >= 45 && ord($data[$i]) <= 58 && ord($data[$i]) != 47) && !(ord($data[$i]) >= 65 && ord($data[$i]) <= 90) && !(ord($data[$i]) >= 97 && ord($data[$i]) <= 122) ) return false;
 		}
