@@ -12,8 +12,7 @@
 $server_inner_ip = '172.16.0.0';
 $admin_passwd = 'adminadmin';
 
-use \Workerman\Worker;
-use Workerman\Protocols\Http;
+use Workerman\Worker, Workerman\Protocols\Http;
 require_once './Workerman/Autoloader.php';
 
 date_default_timezone_set("Asia/Shanghai");
