@@ -10,9 +10,10 @@
 //please config:$server_inner_ip, $admin_passwd;
 
 $server_inner_ip = '172.16.0.0';
+$admin_passwd = 'adminadmin';
 
 use \Workerman\Worker;
-use \Workerman\WebServer;
+use Workerman\Protocols\Http;
 require_once './Workerman/Autoloader.php';
 
 date_default_timezone_set("Asia/Shanghai");
@@ -21,7 +22,7 @@ $worker->count = 4;
 $worker->name = 'Webpage-Process';
 $worker_s = new Worker();
 $worker_s->count = 1;
-$worker_s->name = 'Send-Process';
+$worker_s->name = 'Send-'.$server_inner_ip.'-Process';
 
 //the first create sql table
 //$db = new SQLite3('gxnu_macopen_tool.db');
@@ -35,25 +36,27 @@ $worker_s->onWorkerStart = function($worker_s){
 		$sql = "SELECT name,mac,isp FROM MACOPEN";
 		$ret = $db->query($sql);
 		while($row = $ret->fetchArray(SQLITE3_ASSOC)){
-			echo json_encode($row);
+			//echo json_encode($row);
 			$msg = mac_pack($row['mac'], $row['isp']);
 			echo socket_sendto($sock, $msg, strlen($msg), 0, '202.193.160.123', 20015)."\n";
-			//$ip = '202.193.160.123';
-			//$port = 20015;
-			//socket_recvfrom($sock, $buf, 5, 0, $ip, $port);
-			//echo '>>>'.bin2hex($buf)."\n";
 		}
 		sleep(15);
 	}
 	socket_close($sock);
 };
 
-$worker->onMessage = function($connection, $http){
-	$admin_passwd = 'adminadmin';
+$worker->onMessage = function($connection, $http)use($server_inner_ip, $admin_passwd){
 	$err = '0:未知错误，请联系管理员';
+	Http::header('Connection: close');
+	Http::header('Server: MACOPEN/'.$server_inner_ip);
 	$db = new SQLite3('gxnu_macopen_tool.db');
 	if($http['server']['REQUEST_URI'] == '/' || strpos($http['server']['REQUEST_URI'],'index.html')){
 		$connection->send(file_get_contents('./index.html'));
+		return $connection->close();
+	}else if(strpos($http['server']['REQUEST_URI'], 'favicon.ico')){
+		Http::header('Content-Type: image/x-icon');
+		$connection->send(file_get_contents('./favicon.ico'));
+        return $connection->close();
 	}else if(strpos($http['server']['REQUEST_URI'], 'Select.All')){
 		$result = array();
 		$sql = "SELECT name FROM MACOPEN";
