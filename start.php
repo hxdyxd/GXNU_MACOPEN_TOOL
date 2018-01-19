@@ -146,7 +146,7 @@ $worker->onMessage = function($connection, $http)use($server_inner_ip, $admin_pa
 				$err = '5:物理地址输入错误';
 			}
 		}else{
-			$err = '6:只能输入字母和数字还有 : 哦';
+			$err = '6:只能输入字母和数字还有":"哦';
 		}
 	}
 	$connection->send(json_encode( array('success'=>'0', 'msg'=> $err)));
